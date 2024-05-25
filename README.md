@@ -1,6 +1,8 @@
 # solisAPI
 HTML code to install on web server to set charge times for Solis Battery Inverter
 
+Thanks to stevegal (github) and Adam Cable (adsar.co.uk) for useful starting points and code.
+
 There's a youTube video showing these scripts/utilities in action. The date stamp on the video is May 2024 and the API calls and code were valid then.
 https://www.youtube.com/watch?v=SHr3Gqpplqc
 
