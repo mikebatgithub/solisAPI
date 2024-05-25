@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Reduced output Agile prices: outputs only price including VAT and only for the next (up to 24 hours)
+// Hard-coded Region and AGILE plan (see priceurl variable below)
+// Will have to be updated when things change or you need a different region
+// 
+// As of May 2024 these are valid
+// AGILE-23-12-06
+// E-1R-AGILE-23-12-06-C
+
+// Change this if you like to get YOUR Agile tarriffs for your region
+priceurl = "https://api.octopus.energy/v1/products/AGILE-23-12-06/electricity-tariffs/E-1R-AGILE-23-12-06-C" + "/standard-unit-rates/";
+
+// Change the Non-Zero numbers here to define YOUR preferred default charge currents (keep the 0's as is)
+var CTD = "20,0,0,10,0,0,5,0,0";    // Default output - groups of 3 - charge current#1, start time#1, duration#1, ditto for 2 and 3
+                                    // This string of numbers is used to populate the menus in the solisSetBatteryChargeTimes.html
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+var priceMin = []; 
+var cb = [];
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+
+function datestring() {	
+  var d1 = new Date(urlParams.get('startdate') + " (UTC)");
+  var d2 = new Date(urlParams.get('enddate') + " (UTC)");	
+
+  var d3 = new Date(Date.now());
+  var d4 = new Date(Date.now() + 24*60*60*1000);
+  output = "?period_from=" + d3.toISOString() + "&period_to="  
+  output += d4.toISOString();
+
+  return output;
+}
+
+function checkparams() {
+  return 1;
+}
+	
+function download_csv() {
+  var csv = 'StartTime,PriceExcVAT,PriceIncVAT\n';
+  for (i = price.length-1; i>=0; i--) {
+    csv += price[i].valid_from + "," + price[i].value_exc_vat + "," + price[i].value_inc_vat + "\n";    
+  }
+
+  var hiddenElement = document.createElement('a');
+  hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+  hiddenElement.target = '_blank';
+  hiddenElement.download = 'agile prices.csv';
+  hiddenElement.click();
+}
+
+function priceAnalysis(price)   // picks outthe three cheapest prices
+{
+  var priceMinVal;
+  priceMinVal = 1000;
+
+  for (i = price.length-1; i>=0; i--) {
+    if (price[i].value_inc_vat < priceMinVal) {
+      priceMin[0] = i;
+      priceMinVal = price[i].value_inc_vat;
+    }
+  }
+  priceMinVal = 1000;
+  for (i = price.length-1; i>=0; i--) {
+    if (i == priceMin[0]) { continue; }
+    if (price[i].value_inc_vat < priceMinVal) {
+      priceMin[1] = i;
+      priceMinVal = price[i].value_inc_vat;
+    }
+  }
+  priceMinVal = 1000;
+  for (i = price.length-1; i>=0; i--) {
+    if (i == priceMin[0]) { continue; }
+    if (i == priceMin[1]) { continue; }
+    if (price[i].value_inc_vat < priceMinVal) {
+      priceMin[2] = i;
+      priceMinVal = price[i].value_inc_vat;
+    }
+  }
+}
+
+function funSet(i)   // As user selects the starttimes, the string used to call the solisSetBatteryChargeTimes.html is created 
+{
+  var done = false;
+  var el = "cb[" + i + "]";
+  var e = document.getElementById(el);
+  e.style.color = "red";
+  s = e.getAttribute("data-sel");
+  if (s === "__X__") { s = "__1__"; } 
+  else if (s === "__1__") { s = "__2__"; } 
+  else if (s === "__2__") { s = "__3__"; } 
+  else if (s === "__3__") { s = "__X__"; } 
+  e.setAttribute("data-sel",s); 
+  e.textContent = s; 
+
+  s1 = "0";
+  s2 = "0";
+  s3 = "0";
+  d1 = 0;
+  d2 = 0;
+  d3 = 0;
+  done = false;
+  for (i = price.length-1; i >= 0; i--) {
+    el = "cb[" + i + "]";
+    e = document.getElementById(el);
+    s = e.getAttribute("data-sel");
+    if (s === "__1__")
+    {
+      s1 = e.getAttribute("data-time");
+      d1 = 30;
+      for (j = i-1; j >= 0; j--)
+      {
+        jel = "cb[" + j + "]";
+        je = document.getElementById(jel);
+        js = je.getAttribute("data-sel");
+        if (js === "__1__")
+        {
+          d1 += 30;
+        }
+        else
+        {
+          done = true;
+          break;
+        }
+      }
+    }
+    if (done == true) { break; }
+  }
+
+  done = false;
+  for (i = price.length-1; i >= 0; i--) {
+    el = "cb[" + i + "]";
+    e = document.getElementById(el);
+    s = e.getAttribute("data-sel");
+    if (s === "__2__")
+    {
+      s2 = e.getAttribute("data-time");
+      d2 = 30;
+      for (j = i-1; j >= 0; j--)
+      {
+        jel = "cb[" + j + "]";
+        je = document.getElementById(jel);
+        js = je.getAttribute("data-sel");
+        if (js === "__2__")
+        {
+          d2 += 30;
+        }
+        else
+        {
+          done = true;
+          break;
+        }
+      }
+    }
+    if (done == true) { break; }
+  }
+
+  done = false;
+  for (i = price.length-1; i >= 0; i--) {
+    el = "cb[" + i + "]";
+    e = document.getElementById(el);
+    s = e.getAttribute("data-sel");
+    if (s === "__3__")
+    {
+      s3 = e.getAttribute("data-time");
+      d3 = 30;
+      for (j = i-1; j >= 0; j--)
+      {
+        jel = "cb[" + j + "]";
+        je = document.getElementById(jel);
+        js = je.getAttribute("data-sel");
+        if (js === "__3__")
+        {
+          d3 += 30;
+        }
+        else
+        {
+          done = true;
+          break;
+        }
+      }
+    }
+    if (done == true) { break; }
+  }
+
+  // FYI the times in s1,2,3 are minutes from 00:00 hours
+  CTD = "20," + s1 + "," + d1 + "," + "10," + s2 + "," + d2 + "," + "5," + s3 + "," + d3;     
+}
+
+function processData(price) {
+  var cellcolor;	
+  priceAnalysis(price);
+  output = "";
+
+  output += "<TABLE><TR><TH>Time</TH><TH>Price</TH></TR>";
+  for (i = price.length-1; i>=0; i--) {
+    var t = new Date(price[i].valid_from);
+    var hour = t.getHours();
+    var min  = t.getMinutes();
+    var displaytime = hour + ":" + min;
+    var minmidnight = hour * 60 + min;
+    if (min < 10) displaytime += "0";
+    cellcolor = "#FFFFFF";
+    if (i == priceMin[0]) { cellcolor = "#AAFF00"; }
+    if (i == priceMin[1]) { cellcolor = "#6CFC00"; }
+    if (i == priceMin[2]) { cellcolor = "#90EE90"; }
+    output += "<TR><TD>" + displaytime + "</TD><TD bgcolor=\"" + cellcolor + "\">" + price[i].value_inc_vat + "</TD><TD><button id=\"cb[" + i + "]\" data-sel=__X__ data-time=" + minmidnight + " onclick=funSet(" + i + ")>__X__</button></TD></TR>";
+  }
+
+  output += "</TABLE>";
+  document.getElementById("results").innerHTML = output;
+}
+
+function loadURL(url) {
+  var xhttp = new XMLHttpRequest();
+  var output = {status: 0, content: "empty"};
+  xhttp.open("GET", url , false);
+
+  xhttp.send();
+  output.status = 1;
+  output.content = JSON.parse(xhttp.response);
+  return output; 	
+
+}
+
+function loadMultipageURL(url) {
+    	
+    var outputs = [];
+    output = loadURL(url);
+    outputs = output.content.results;
+    while (typeof output.content.next == "string" ) {
+	output = loadURL(output.content.next);
+	outputs = outputs.concat(output.content.results);
+    }
+    output.content = outputs;
+    return output;
+}
+
+
+function loadDoc() {
+    if (checkparams()) {
+           priceurl = priceurl + datestring();
+           price = loadMultipageURL(priceurl);
+	   price = price.content;
+//           document.getElementById("urls").innerHTML = priceurl + "<BR>";
+           //document.getElementById("results").innerHTML = JSON.stringify(price);
+           processData(price);
+	}
+}
+
+function programBattery()
+{
+//  url = "https://www.websitename.com/solis/solisSetBatteryChargeTimes.html?data=" + CTD;
+  url = "./solisSetBatteryChargeTimes.html?data=" + CTD;
+  window.location.replace(url);
+}
+
+</script>
+<style>
+  th, td, button {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 3px;
+    font-size: 6vw;
+  }
+  table {
+    width: 100%;
+  }
+
+  @media only screen and (orientation: landscape) {
+    th, td, select, button {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 3px;
+      font-size: 2vw;
+    }
+    table {
+      width: 30%;
+    }
+  }
+
+</style>
+</head>
+
+<body onload="loadDoc()">
+  <div id="header" >Electricity Price Now
+
+    <button onclick="programBattery()">Program Battery</button>
+
+  </div>
+	
+  <div id="results" >None</div>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+
+<h1>Solis setBatteryChargeTimes.html</h1>
+<h2>Thanks to stevegal at github and Adam Cable (adsar) for the initial API and PhP starting points</h2>
+
+
+  <?php
+// ==========================================================================
+
+  $keyID = '1300567876598974337';                               // the API keys
+  $keySecret = '28a9cd7ceecabcd76d345895b1be24';              
+  $username = '"' . "mysolisusername" . '"';                    // your username
+  $stationName = '"' . "plyon battery" . '"';                   // your 'plant name'
+
+  // $passw = '"' . md5("myhardcodedPassword",FALSE) . '"';     // insert password here ...
+  $pass = $_GET['pass'];                                        // ..OR..
+  $passw = '"' . md5($pass,FALSE) . '"';                        // read from GET string on the http address line
+
+  $chargeTimes = '"' . $_GET['chargeTimes'] . '"';              // Get the charge times from the http address line OR..
+
+  $debug = false;                                               // set to true to see return info from inverter
+
+  //$chargeTimes = '"' . "30,0,11:01,12:29,00:00,00:00,40,0,22:31,22:59,00:00,00:00,4,0,00:00,00:00,00:00,00:00" . '"';
+
+  // Pull in the charge times from the http address line OR you can set the $chargeTimes directly as above. 
+  // the http address will look something like this: 
+  // https://www.yourwebsitename.com/solis/setBatteryChargeTimes.html?chargeTimes=30,0,11:01,12:29,00:00,00:00,40,0,22:31,22:59,00:00,00:00,4,0,00:00,00:00,00:00,00:00&pass=mysolispassword
+  // where the arguments are :
+  // chargeCurrent,dischargeCurrent,chargeStartTime,chargeEndTime,dischargeStartTime,dischargeEndTime..
+  // and ditto twice more
+  // In the example above, the first charge is at 30 Amps starting at 11am for 1hr30 mins, 
+  //   the second at 40 Amps starting at 10.31pm for 30 minutes and the third is not used
+  //   The discharge currents and times are all set to zero (but you could change those)
+
+  echo "<br><h2>Charge Times = " . $chargeTimes . "</h2>";
+
+// goto endlabel;     // can useful for debugging 
+
+  echo "<pre id=\"solisdata\">\n";
+
+// ==========================================================================
+
+  $body = '{"stationName":' . $stationName . ' }';
+
+  $contentMD5 = base64_encode(md5($body, true));
+  $contentType = "application/json";
+  $endPoint = "/v1/api/inverterList";
+  $gmdate = gmdate("D, j M Y H:i:s") . " GMT";
+  $cadena = "POST\n{$contentMD5}\n{$contentType}\n{$gmdate}\n{$endPoint}";
+  $signature = base64_encode(pack('H*',hash_hmac('sha1', $cadena , $keySecret, false)));
+  $authorization = "API_" . $keyID . ":" . $signature;
+
+  $curl = curl_init();
+
+  $headers = array(
+    'Content-MD5: ' . $contentMD5,
+    'Authorization: ' . $authorization,
+    'Content-Type: ' . $contentType,
+    'Date: ' . $gmdate
+  );
+
+  $urldata = 'https://www.soliscloud.com:13333'.$endPoint;
+
+  curl_setopt_array($curl, array(
+    CURLOPT_URL => 'https://www.soliscloud.com:13333'.$endPoint,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => '',
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 0,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_CUSTOMREQUEST => 'POST',
+    CURLOPT_POSTFIELDS => $body,
+    CURLOPT_HTTPHEADER => $headers,
+  ));
+
+  if ($debug) {
+    echo "urldata ->";
+    echo $urldata . "\n";
+    echo "\nbody ->";
+    echo $body;
+    echo "\nheaders ->";
+    print_r ($headers);
+    echo "\nResponse\n";
+  }
+
+  $response = curl_exec($curl);
+
+  curl_close($curl);
+
+  $JSONresponse = json_encode(json_decode($response), JSON_PRETTY_PRINT);
+  if ($debug) {
+    echo $JSONresponse;
+  }
+
+  $jsondata = json_decode($response, true);
+  if ($debug) {
+    echo "\nDigging out id which will become inverterId in /v2/api/control-->";
+    echo $jsondata['data']['page']['records'][0]['id'];
+    echo "<--\n";
+  }
+
+  $inverterIdString = '"' . $jsondata['data']['page']['records'][0]['id'] . '"'; // used in/api/control
+
+
+// ==========================================================================
+
+
+  $body = '{"userInfo":' . $username . ', "passWord":' . $passw . '}';
+
+  $contentMD5 = base64_encode(md5($body, true));
+  $contentType = "application/json";
+  $endPoint = "/v2/api/login";
+  $gmdate = gmdate("D, j M Y H:i:s") . " GMT";
+  $cadena = "POST\n{$contentMD5}\n{$contentType}\n{$gmdate}\n{$endPoint}";
+  $signature = base64_encode(pack('H*',hash_hmac('sha1', $cadena , $keySecret, false)));
+  $authorization = "API_" . $keyID . ":" . $signature;
+
+  $curl = curl_init();
+
+  $headers = array(
+    'Content-MD5: ' . $contentMD5,
+    'Authorization: ' . $authorization,
+    'Content-Type: ' . $contentType,
+    'Date: ' . $gmdate
+  );
+
+  $urldata = 'https://www.soliscloud.com:13333'.$endPoint;
+
+  curl_setopt_array($curl, array(
+    CURLOPT_URL => 'https://www.soliscloud.com:13333'.$endPoint,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => '',
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 0,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_CUSTOMREQUEST => 'POST',
+    CURLOPT_POSTFIELDS => $body,
+    CURLOPT_HTTPHEADER => $headers,
+  ));
+
+  if ($debug) {
+    echo "urldata ->";
+    echo $urldata . "\n";
+    echo "\nbody ->";
+    echo $body;
+    echo "\nheaders ->";
+    print_r ($headers);
+    echo "\nResponse\n";
+  }
+
+  $response = curl_exec($curl);
+
+  curl_close($curl);
+
+  $JSONresponse = json_encode(json_decode($response), JSON_PRETTY_PRINT);
+  if ($debug) {
+    echo $JSONresponse;
+    echo "\n";
+  }
+
+  $jsondata = json_decode($response, true);
+  if ($debug) {
+    echo "\nDigging out token -->";
+    echo $jsondata['csrfToken'];
+    echo "<--\n";
+  }
+
+  $token = $jsondata['csrfToken'];
+
+  if ($token == "") {
+    echo "</pre><h1>No Token Returned. Probably incorrect password</h1><pre>";
+  }
+
+// ==========================================================================
+
+  // $inverterIDString comes from /v1/api/inverterList above
+  // $chargeTimes comes from the http input string
+
+  if ($debug) {
+    echo "inverterString = " . $inverterIdString . "\n";
+  }
+
+  $body = '{"inverterId":' . $inverterIdString . ', "cid":"103", "value":' . $chargeTimes . '}';
+
+  // "value":"3,0,00:00,00:00,00:00,00:00,4,0,00:00,00:00,00:00,00:00,4,0,00:00,00:00,00:00,00:00"}';
+
+  $contentMD5 = base64_encode(md5($body, true));
+  $contentType = "application/json";
+  $endPoint = "/v2/api/control";
+  $gmdate = gmdate("D, j M Y H:i:s") . " GMT";
+  $cadena = "POST\n{$contentMD5}\n{$contentType}\n{$gmdate}\n{$endPoint}";
+  $signature = base64_encode(pack('H*',hash_hmac('sha1', $cadena , $keySecret, false)));
+  $authorization = "API_" . $keyID . ":" . $signature;
+
+  $curl = curl_init();
+
+  $headers = array(
+    'Content-MD5: ' . $contentMD5,
+    'Authorization: ' . $authorization,
+    'Content-Type: ' . $contentType,
+    'Date: ' . $gmdate,
+    'Token: ' . $token
+  );
+
+
+  $urldata = 'https://www.soliscloud.com:13333'.$endPoint;
+
+  curl_setopt_array($curl, array(
+    CURLOPT_URL => 'https://www.soliscloud.com:13333'.$endPoint,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => '',
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 0,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_CUSTOMREQUEST => 'POST',
+    CURLOPT_POSTFIELDS => $body,
+    CURLOPT_HTTPHEADER => $headers,
+  ));
+
+  if ($debug) {
+    echo "urldata ->";
+    echo $urldata . "\n";
+    echo "\nbody ->";
+    echo $body;
+    echo "\nheaders ->";
+    print_r ($headers);
+    echo "\nResponse\n";
+  }
+
+  $response = curl_exec($curl);
+
+  curl_close($curl);
+
+  $JSONresponse = json_encode(json_decode($response), JSON_PRETTY_PRINT);
+  if ($debug) {
+    echo $JSONresponse;
+  }
+
+  echo "Use your login on soliscloud to check the Battery Charge Profile.\n";
+  echo "On the Inverter Screen, Click Work Mode, Click Self-Use Mode, On row 2 click view\n";
+  echo "\nWarning : There's no guarantee that these API calls will work in the future!\n"; 
+
+  endlabel:
+
+  ?>
+
+  </pre>
+
+</body>
+</html>

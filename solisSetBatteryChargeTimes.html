@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  /* this looks OK on phones */
+  th, td, select, button {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 3px;
+    font-size: 6vw;
+  }
+  table {
+    width: 100%;
+  }
+
+  /* @media block below works OK on laptops */
+  @media only screen and (orientation: landscape) {
+    th, td, select, button {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 3px;
+      font-size: 1.8vw;
+    }
+    table {
+      width: 30%;
+    }
+  }
+</style>
+
+</head>
+<body onLoad="mySetup()">
+<TABLE>
+  <TR><TD>Set Current and Time</TD><TD><button onclick="send()">Send</button></TD></TR>
+  <TR><TD>Password</TD><TD>
+    <input type="password" id="pass" name="password">
+    <input type="checkbox" onclick="showPassword()">
+   </TD></TR>
+</TABLE>
+
+<label id="debug">data</Label>
+
+<TABLE>
+  <TR><TH>Parameter</TH><TH>Value</TH></TR>
+
+<!-- Below is the Charge Current selection drop down. It should be pretty -->
+<!-- obvious how to alter it to change the current options                -->
+
+<TR><TD>Charge Current (AMPS):</TD><TD>
+<select name="current1" id="current1-select">
+  <option value="0">0</option>
+  <option value="1">1</option>
+  <option value="5">5</option>
+  <option value="10">10</option>
+  <option value="15">15</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+  <option value="40">40</option>
+  <option value="50">50</option>
+</select></TD></TR>
+
+<!-- All the time calcs are done in minutes since midnight 00:00 -->
+
+<TR><TD>Start Time</TD><TD>
+<select name="time1" id="time1-select">
+  <option value="0">00:00</option>
+  <option value="30">00:30</option>
+  <option value="60">01:00</option>
+  <option value="90">01:30</option>
+  <option value="120">02:00</option>
+  <option value="150">02:30</option>
+  <option value="180">03:00</option>
+  <option value="210">03:30</option>
+  <option value="240">04:00</option>
+  <option value="270">04:30</option>
+  <option value="300">05:00</option>
+  <option value="330">05:30</option>
+  <option value="360">06:00</option>
+  <option value="390">06:30</option>
+  <option value="420">07:00</option>
+  <option value="450">07:30</option>
+  <option value="480">08:00</option>
+  <option value="510">08:30</option>
+  <option value="540">09:00</option>
+  <option value="570">09:30</option>
+  <option value="600">10:00</option>
+  <option value="630">10:30</option>
+  <option value="660">11:00</option>
+  <option value="690">11:30</option>
+  <option value="720">12:00</option>
+  <option value="750">12:30</option>
+  <option value="780">13:00</option>
+  <option value="810">13:30</option>
+  <option value="840">14:00</option>
+  <option value="870">14:30</option>
+  <option value="900">15:00</option>
+  <option value="930">15:30</option>
+  <option value="960">16:00</option>
+  <option value="990">16:30</option>
+  <option value="1020">17:00</option>
+  <option value="1050">17:30</option>
+  <option value="1080">18:00</option>
+  <option value="1110">18:30</option>
+  <option value="1140">19:00</option>
+  <option value="1170">19:30</option>
+  <option value="1200">20:00</option>
+  <option value="1230">20:30</option>
+  <option value="1260">21:00</option>
+  <option value="1290">21:30</option>
+  <option value="1320">22:00</option>
+  <option value="1350">22:30</option>
+  <option value="1380">23:00</option>
+  <option value="1410">23:30</option>
+</select></TD></TR>
+
+<!-- The durations are done in minutes. The drop down shows hours and minutes -->
+
+<TR><TD>Duration</TD><TD>
+<select name="duration1" id="duration1-select">
+  <option value="0">0</option>
+  <option value="30">30min</option>
+  <option value="60">1 hour</option>
+  <option value="90">1hr 30</option>
+  <option value="120">2 hours</option>
+  <option value="150">2hr 30</option>
+  <option value="180">3 hours</option>
+  <option value="210">3hr 30</option>
+  <option value="240">4 hours</option>
+</select></TD></TR>
+
+<!-- ====================================================================== -->
+
+<!-- see above for explanation -->
+
+<TR><TD>Charge Current (AMPS):</TD><TD>
+<select name="current2" id="current2-select">
+  <option value="0">0</option>
+  <option value="1">1</option>
+  <option value="5">5</option>
+  <option value="10">10</option>
+  <option value="15">15</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+  <option value="40">40</option>
+  <option value="50">50</option>
+</select></TD></TR>
+
+<!-- see above for explanation -->
+
+<TR><TD>Start Time</TD><TD>
+<select name="time2" id="time2-select">
+  <option value="0">00:00</option>
+  <option value="30">00:30</option>
+  <option value="60">01:00</option>
+  <option value="90">01:30</option>
+  <option value="120">02:00</option>
+  <option value="150">02:30</option>
+  <option value="180">03:00</option>
+  <option value="210">03:30</option>
+  <option value="240">04:00</option>
+  <option value="270">04:30</option>
+  <option value="300">05:00</option>
+  <option value="330">05:30</option>
+  <option value="360">06:00</option>
+  <option value="390">06:30</option>
+  <option value="420">07:00</option>
+  <option value="450">07:30</option>
+  <option value="480">08:00</option>
+  <option value="510">08:30</option>
+  <option value="540">09:00</option>
+  <option value="570">09:30</option>
+  <option value="600">10:00</option>
+  <option value="630">10:30</option>
+  <option value="660">11:00</option>
+  <option value="690">11:30</option>
+  <option value="720">12:00</option>
+  <option value="750">12:30</option>
+  <option value="780">13:00</option>
+  <option value="810">13:30</option>
+  <option value="840">14:00</option>
+  <option value="870">14:30</option>
+  <option value="900">15:00</option>
+  <option value="930">15:30</option>
+  <option value="960">16:00</option>
+  <option value="990">16:30</option>
+  <option value="1020">17:00</option>
+  <option value="1050">17:30</option>
+  <option value="1080">18:00</option>
+  <option value="1110">18:30</option>
+  <option value="1140">19:00</option>
+  <option value="1170">19:30</option>
+  <option value="1200">20:00</option>
+  <option value="1230">20:30</option>
+  <option value="1260">21:00</option>
+  <option value="1290">21:30</option>
+  <option value="1320">22:00</option>
+  <option value="1350">22:30</option>
+  <option value="1380">23:00</option>
+  <option value="1410">23:30</option>
+</select></TD></TR>
+
+<!-- see above for explanation -->
+
+<TR><TD>Duration</TD><TD>
+<select name="duration2" id="duration2-select">
+  <option value="0">0</option>
+  <option value="30">30min</option>
+  <option value="60">1 hour</option>
+  <option value="90">1hr 30</option>
+  <option value="120">2 hours</option>
+  <option value="150">2hr 30</option>
+  <option value="180">3 hours</option>
+  <option value="210">3hr 30</option>
+  <option value="240">4 hours</option>
+</select></TD></TR>
+
+<!-- ====================================================================== -->
+
+<!-- see above for explanation -->
+
+<TR><TD>Charge Current (AMPS):</TD><TD>
+<select name="current3" id="current3-select">
+  <option value="0">0</option>
+  <option value="1">1</option>
+  <option value="5">5</option>
+  <option value="10">10</option>
+  <option value="15">15</option>
+  <option value="20">20</option>
+  <option value="30">30</option>
+  <option value="40">40</option>
+  <option value="50">50</option>
+</select></TD></TR>
+
+<!-- see above for explanation -->
+
+<TR><TD>Start Time</TD><TD>
+<select name="time3" id="time3-select">
+  <option value="0">00:00</option>
+  <option value="30">00:30</option>
+  <option value="60">01:00</option>
+  <option value="90">01:30</option>
+  <option value="120">02:00</option>
+  <option value="150">02:30</option>
+  <option value="180">03:00</option>
+  <option value="210">03:30</option>
+  <option value="240">04:00</option>
+  <option value="270">04:30</option>
+  <option value="300">05:00</option>
+  <option value="330">05:30</option>
+  <option value="360">06:00</option>
+  <option value="390">06:30</option>
+  <option value="420">07:00</option>
+  <option value="450">07:30</option>
+  <option value="480">08:00</option>
+  <option value="510">08:30</option>
+  <option value="540">09:00</option>
+  <option value="570">09:30</option>
+  <option value="600">10:00</option>
+  <option value="630">10:30</option>
+  <option value="660">11:00</option>
+  <option value="690">11:30</option>
+  <option value="720">12:00</option>
+  <option value="750">12:30</option>
+  <option value="780">13:00</option>
+  <option value="810">13:30</option>
+  <option value="840">14:00</option>
+  <option value="870">14:30</option>
+  <option value="900">15:00</option>
+  <option value="930">15:30</option>
+  <option value="960">16:00</option>
+  <option value="990">16:30</option>
+  <option value="1020">17:00</option>
+  <option value="1050">17:30</option>
+  <option value="1080">18:00</option>
+  <option value="1110">18:30</option>
+  <option value="1140">19:00</option>
+  <option value="1170">19:30</option>
+  <option value="1200">20:00</option>
+  <option value="1230">20:30</option>
+  <option value="1260">21:00</option>
+  <option value="1290">21:30</option>
+  <option value="1320">22:00</option>
+  <option value="1350">22:30</option>
+  <option value="1380">23:00</option>
+  <option value="1410">23:30</option>
+</select></TD></TR>
+
+<!-- see above for explanation -->
+
+<TR><TD>Duration</TD><TD>
+<select name="duration3" id="duration3-select">
+  <option value="0">0</option>
+  <option value="30">30min</option>
+  <option value="60">1 hour</option>
+  <option value="90">1hr 30</option>
+  <option value="120">2 hours</option>
+  <option value="150">2hr 30</option>
+  <option value="180">3 hours</option>
+  <option value="210">3hr 30</option>
+  <option value="240">4 hours</option>
+</select></TD></TR>
+
+<!-- ====================================================================== -->
+
+</TABLE>
+
+<!-- Here we add one minute to the start times -->
+
+<script>
+function convertStartTime(t)
+{
+  switch(t) {
+    case  0: return("00:00"); break;
+    case 30: return("00:31"); break;
+    case 60: return("01:01"); break;
+    case 90: return("01:31"); break;
+    case 120: return("02:01"); break;
+    case 150: return("02:31"); break;
+    case 180: return("03:01"); break;
+    case 210: return("03:31"); break;
+    case 240: return("04:01"); break;
+    case 270: return("04:31"); break;
+    case 300: return("05:01"); break;
+    case 330: return("05:31"); break;
+    case 360: return("06:01"); break;
+    case 390: return("06:31"); break;
+    case 420: return("07:01"); break;
+    case 450: return("07:31"); break;
+    case 480: return("08:01"); break;
+    case 510: return("08:31"); break;
+    case 540: return("09:01"); break;
+    case 570: return("09:31"); break;
+    case 600: return("10:01"); break;
+    case 630: return("10:31"); break;
+    case 660: return("11:01"); break;
+    case 690: return("11:31"); break;
+    case 720: return("12:01"); break;
+    case 750: return("12:31"); break;
+    case 780: return("13:01"); break;
+    case 810: return("13:31"); break;
+    case 840: return("14:01"); break;
+    case 870: return("14:31"); break;
+    case 900: return("15:01"); break;
+    case 930: return("15:31"); break;
+    case 960: return("16:01"); break;
+    case 990: return("16:31"); break;
+    case 1020: return("17:01"); break;
+    case 1050: return("17:31"); break;
+    case 1080: return("18:01"); break;
+    case 1110: return("18:31"); break;
+    case 1140: return("19:01"); break;
+    case 1170: return("19:31"); break;
+    case 1200: return("20:01"); break;
+    case 1230: return("20:31"); break;
+    case 1260: return("21:01"); break;
+    case 1290: return("21:31"); break;
+    case 1320: return("22:01"); break;
+    case 1350: return("22:31"); break;
+    case 1380: return("23:01"); break;
+    case 1410: return("23:31"); break;
+    default: return("error");
+  }
+}
+
+<!-- Here we add one minute to the end times -->
+
+function convertEndTime(t)
+{
+  switch(t) {
+    case  0:  return("00:00"); break;
+    case 30:  return("00:29"); break;
+    case 60:  return("00:59"); break;
+    case 90:  return("01:29"); break;
+    case 120: return("01:59"); break;
+    case 150: return("02:29"); break;
+    case 180: return("02:59"); break;
+    case 210: return("03:29"); break;
+    case 240: return("03:59"); break;
+    case 270: return("04:29"); break;
+    case 300: return("04:59"); break;
+    case 330: return("05:29"); break;
+    case 360: return("05:59"); break;
+    case 390: return("06:29"); break;
+    case 420: return("06:59"); break;
+    case 450: return("07:29"); break;
+    case 480: return("07:59"); break;
+    case 510: return("08:29"); break;
+    case 540: return("08:59"); break;
+    case 570: return("09:29"); break;
+    case 600: return("09:59"); break;
+    case 630: return("10:29"); break;
+    case 660: return("10:59"); break;
+    case 690: return("11:29"); break;
+    case 720: return("11:59"); break;
+    case 750: return("12:29"); break;
+    case 780: return("12:59"); break;
+    case 810: return("13:29"); break;
+    case 840: return("13:59"); break;
+    case 870: return("14:29"); break;
+    case 900: return("14:59"); break;
+    case 930: return("15:29"); break;
+    case 960: return("15:59"); break;
+    case 990: return("16:29"); break;
+    case 1020: return("16:59"); break;
+    case 1050: return("17:29"); break;
+    case 1080: return("17:59"); break;
+    case 1110: return("18:29"); break;
+    case 1140: return("18:59"); break;
+    case 1170: return("19:29"); break;
+    case 1200: return("19:59"); break;
+    case 1230: return("20:29"); break;
+    case 1260: return("20:59"); break;
+    case 1290: return("21:29"); break;
+    case 1320: return("21:59"); break;
+    case 1350: return("22:29"); break;
+    case 1380: return("22:59"); break;
+    case 1410: return("23:29"); break;
+    case 1440: return("23:59"); break;
+    default: return("error");
+  }
+}
+
+function send()
+{
+  var c1 = document.getElementById("current1-select").value;
+  var t1 = document.getElementById("time1-select").value;
+  var d1 = document.getElementById("duration1-select").value;
+  var c2 = document.getElementById("current2-select").value;
+  var t2 = document.getElementById("time2-select").value;
+  var d2 = document.getElementById("duration2-select").value;
+  var c3 = document.getElementById("current3-select").value;
+  var t3 = document.getElementById("time3-select").value;
+  var d3 = document.getElementById("duration3-select").value;
+
+  // The code below ensures that the charge currents and times string sent to the
+  // third utility (the one that calls the soliscloud API) are valid
+
+  end1 = convertEndTime(Number(t1) + Number(d1));
+  if ((Number(t1) > 0) && (Number(d1) == 0)) { end1 = "error"; }
+  if (end1 === "error") 
+  { 
+    d1adjusted = "30";
+    end1 = convertEndTime(Number(t1) + Number(d1adjusted));  // if gone over midnight then claw back to stop at 23:59
+  }
+  start1 = convertStartTime(Number(t1)); 
+  
+  end2 = convertEndTime(Number(t2) + Number(d2));
+  if ((Number(t2) > 0) && (Number(d2) == 0)) { end2 = "error"; }
+  if (end2 === "error") 
+  { 
+    d2adjusted = "30";
+    end2 = convertEndTime(Number(t2) + Number(d2adjusted));  // if gone over midnight then claw back to stop at 23:59
+  }
+  start2 = convertStartTime(Number(t2)); 
+
+  end3 = convertEndTime(Number(t3) + Number(d3));
+  if ((Number(t3) > 0) && (Number(d3) == 0)) { end3 = "error"; }
+  if (end3 === "error") 
+  { 
+    d3adjusted = "30";
+    end3 = convertEndTime(Number(t3) + Number(d3adjusted));  // if gone over midnight then claw back to stop at 23:59
+  }
+  start3 = convertStartTime(Number(t3)); 
+
+  chargeTimes = 
+        c1 + ",0," + start1 + "," + end1 + ",00:00,00:00," +
+        c2 + ",0," + start2 + "," + end2 + ",00:00,00:00," +
+        c3 + ",0," + start3 + "," + end3 + ",00:00,00:00";
+
+  var passw = document.getElementById("pass").value;
+
+  document.getElementById("debug").innerHTML = chargeTimes + " " + "password";
+
+//  makeTheChange("https://websitename.com/solis/setBatteryChargeTimes.html?chargeTimes=" + chargeTimes +"&pass=" + passw);
+  makeTheChange("./setBatteryChargeTimes.html?chargeTimes=" + chargeTimes +"&pass=" + passw);
+}
+
+function makeTheChange(url) {
+  // document.getElementById("debug").innerHTML = url;
+  window.location.replace(url);
+}
+
+function showPassword() {
+  var x = document.getElementById("pass");
+  if (x.type === "password") {
+    x.type = "text";
+  } else {
+    x.type = "password";
+  }
+}
+</script>
+
+<?php
+
+// This php code dynamically creates a javescript function with selections made 
+// in the agilePrices.html utility. When called (on pageload) the dropdowns are
+// populated with the selected data
+
+echo "<script>\n";
+echo "function mySetup() {\n";
+if(isset($_GET['data']))
+{
+  $a = str_getcsv($_GET['data']);
+echo "  document.getElementById(\"current1-select\").querySelector('option[value=\"{$a[0]}\"]').selected = true;\n";
+echo "  document.getElementById(\"time1-select\").querySelector('option[value=\"{$a[1]}\"]').selected = true;\n";
+echo "  document.getElementById(\"duration1-select\").querySelector('option[value=\"{$a[2]}\"]').selected = true;\n";
+echo "  document.getElementById(\"current2-select\").querySelector('option[value=\"{$a[3]}\"]').selected = true;\n";
+echo "  document.getElementById(\"time2-select\").querySelector('option[value=\"{$a[4]}\"]').selected = true;\n";
+echo "  document.getElementById(\"duration2-select\").querySelector('option[value=\"{$a[5]}\"]').selected = true;\n";
+echo "  document.getElementById(\"current3-select\").querySelector('option[value=\"{$a[6]}\"]').selected = true;\n";
+echo "  document.getElementById(\"time3-select\").querySelector('option[value=\"{$a[7]}\"]').selected = true;\n";
+echo "  document.getElementById(\"duration3-select\").querySelector('option[value=\"{$a[8]}\"]').selected = true;\n";
+}
+echo "}\n";
+echo "</script>\n";
+
+?>
+
+
+</body>
+</html>
